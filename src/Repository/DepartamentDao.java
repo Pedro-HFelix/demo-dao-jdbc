@@ -1,6 +1,6 @@
 package Repository;
 
-import model.Departament;
+import Entities.Departament;
 
 import java.util.List;
 

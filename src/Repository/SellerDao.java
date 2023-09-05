@@ -1,6 +1,6 @@
 package Repository;
 
-import model.Seller;
+import Entities.Seller;
 
 import java.util.List;
 
