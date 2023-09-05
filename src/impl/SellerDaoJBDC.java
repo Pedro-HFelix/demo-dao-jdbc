@@ -23,30 +23,30 @@ public class SellerDaoJBDC implements SellerDao {
     @Override
     public void insert(Seller obj) {
         PreparedStatement st = null;
-        try{
+        try {
             st = conn.prepareStatement("Insert into seller " +
                     "(Name,Email,BirthDate,BaseSalary,DepartmentId) " +
                     "values(?,?,?,?,?) ", Statement.RETURN_GENERATED_KEYS);
-            st.setString(1,obj.getName());
-            st.setString(2,obj.getEmail());
-            st.setDate(3,new java.sql.Date(obj.getBithDate().getTime()));
-            st.setDouble(4,obj.getBaseSalary());
-            st.setInt(5,obj.getDepartament().getId());
+            st.setString(1, obj.getName());
+            st.setString(2, obj.getEmail());
+            st.setDate(3, new java.sql.Date(obj.getBithDate().getTime()));
+            st.setDouble(4, obj.getBaseSalary());
+            st.setInt(5, obj.getDepartament().getId());
 
             int rowsAffected = st.executeUpdate();
-            if(rowsAffected >0){
+            if (rowsAffected > 0) {
                 ResultSet rs = st.getGeneratedKeys();
-                if (rs.next()){
+                if (rs.next()) {
                     int id = rs.getInt(1);
                     obj.setId(id);
                 }
                 DBConnector.closeResult(rs);
-            }else {
+            } else {
                 throw new BDEXCEPTION("No rows affected");
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             throw new BDEXCEPTION(e.getMessage());
-        }finally {
+        } finally {
             DBConnector.closeStatement(st);
         }
     }
@@ -55,28 +55,38 @@ public class SellerDaoJBDC implements SellerDao {
     public void update(Seller obj) {
 
         PreparedStatement st = null;
-        try{
+        try {
             st = conn.prepareStatement("Update seller " +
                     "set Name = ?, Email = ?, BirthDate =  ?, BaseSalary = ?,DepartmentId = ? " +
                     "where Id = ?");
-            st.setString(1,obj.getName());
-            st.setString(2,obj.getEmail());
-            st.setDate(3,new java.sql.Date(obj.getBithDate().getTime()));
-            st.setDouble(4,obj.getBaseSalary());
-            st.setInt(5,obj.getDepartament().getId());
-            st.setInt(6,obj.getId());
+            st.setString(1, obj.getName());
+            st.setString(2, obj.getEmail());
+            st.setDate(3, new java.sql.Date(obj.getBithDate().getTime()));
+            st.setDouble(4, obj.getBaseSalary());
+            st.setInt(5, obj.getDepartament().getId());
+            st.setInt(6, obj.getId());
             st.executeUpdate();
 
-        }catch (SQLException e){
+        } catch (SQLException e) {
             throw new BDEXCEPTION(e.getMessage());
-        }finally {
+        } finally {
             DBConnector.closeStatement(st);
         }
 
     }
 
     @Override
-    public void deleteById(Seller id) {
+    public void deleteById(Integer id) {
+        PreparedStatement st = null;
+        try {
+            st = conn.prepareStatement("Delete from Seller where id = ?");
+            st.setInt(1, id);
+            st.executeUpdate();
+        } catch (SQLException e) {
+            throw new BDEXCEPTION(e.getMessage());
+        } finally {
+            DBConnector.closeStatement(st);
+        }
 
     }
 
