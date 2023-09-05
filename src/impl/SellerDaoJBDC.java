@@ -22,7 +22,7 @@ public class SellerDaoJBDC implements SellerDao {
 
     @Override
     public void insert(Seller obj) {
-        
+
     }
 
     @Override
@@ -39,36 +39,46 @@ public class SellerDaoJBDC implements SellerDao {
     public Seller findById(Integer id) {
         PreparedStatement st = null;
         ResultSet resultSet = null;
-        try{
+        try {
             st = conn.prepareStatement("select " +
                     "seller.*, department.Name as DepName " +
                     "from seller  " +
                     "Inner join department on (seller.departmentId = department.Id)" +
                     " where seller.Id = ?");
-            st.setInt(1,id);
+            st.setInt(1, id);
             resultSet = st.executeQuery();
             //pois começa em 0 e 0 não tem objeto
-            if(resultSet.next()){
-                Departament dep = new Departament();
-                dep.setId(resultSet.getInt("DepartmentId"));
-                dep.setName(resultSet.getString("DepName"));
-                Seller sl = new Seller();
-                sl.setId(resultSet.getInt("Id"));
-                sl.setName(resultSet.getString("Name"));
-                sl.setEmail(resultSet.getString("Email"));
-                sl.setBithDate(resultSet.getDate("BirthDate"));
-                sl.setBaseSalary(resultSet.getDouble("BaseSalary"));
-                sl.setDepartament(dep);
+            if (resultSet.next()) {
+                Departament dep = instantiateDepartament(resultSet);
+                Seller sl = instantiateSeller(resultSet, dep);
                 return sl;
             }
             return null;
         } catch (SQLException e) {
             throw new BDEXCEPTION(e.getMessage());
-        }finally {
+        } finally {
             DBConnector.closeResult(resultSet);
             DBConnector.closeStatement(st);
         }
 
+    }
+
+    private Seller instantiateSeller(ResultSet resultSet, Departament dep) throws SQLException {
+        Seller sl = new Seller();
+        sl.setId(resultSet.getInt("Id"));
+        sl.setName(resultSet.getString("Name"));
+        sl.setEmail(resultSet.getString("Email"));
+        sl.setBithDate(resultSet.getDate("BirthDate"));
+        sl.setBaseSalary(resultSet.getDouble("BaseSalary"));
+        sl.setDepartament(dep);
+        return sl;
+    }
+
+    private Departament instantiateDepartament(ResultSet resultSet) throws SQLException {
+        Departament dep = new Departament();
+        dep.setId(resultSet.getInt("DepartmentId"));
+        dep.setName(resultSet.getString("DepName"));
+        return dep;
     }
 
     @Override
