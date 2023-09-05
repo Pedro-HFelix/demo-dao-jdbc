@@ -6,10 +6,7 @@ import Entities.Departament;
 import Entities.Seller;
 import Repository.SellerDao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +22,33 @@ public class SellerDaoJBDC implements SellerDao {
 
     @Override
     public void insert(Seller obj) {
+        PreparedStatement st = null;
+        try{
+            st = conn.prepareStatement("Insert into seller " +
+                    "(Name,Email,BirthDate,BaseSalary,DepartmentId) " +
+                    "values(?,?,?,?,?) ", Statement.RETURN_GENERATED_KEYS);
+            st.setString(1,obj.getName());
+            st.setString(2,obj.getEmail());
+            st.setDate(3,new java.sql.Date(obj.getBithDate().getTime()));
+            st.setDouble(4,obj.getBaseSalary());
+            st.setInt(5,obj.getDepartament().getId());
 
+            int rowsAffected = st.executeUpdate();
+            if(rowsAffected >0){
+                ResultSet rs = st.getGeneratedKeys();
+                if (rs.next()){
+                    int id = rs.getInt(1);
+                    obj.setId(id);
+                }
+                DBConnector.closeResult(rs);
+            }else {
+                throw new BDEXCEPTION("No rows affected");
+            }
+        }catch (SQLException e){
+            throw new BDEXCEPTION(e.getMessage());
+        }finally {
+            DBConnector.closeStatement(st);
+        }
     }
 
     @Override
