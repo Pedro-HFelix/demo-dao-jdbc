@@ -54,6 +54,25 @@ public class SellerDaoJBDC implements SellerDao {
     @Override
     public void update(Seller obj) {
 
+        PreparedStatement st = null;
+        try{
+            st = conn.prepareStatement("Update seller " +
+                    "set Name = ?, Email = ?, BirthDate =  ?, BaseSalary = ?,DepartmentId = ? " +
+                    "where Id = ?");
+            st.setString(1,obj.getName());
+            st.setString(2,obj.getEmail());
+            st.setDate(3,new java.sql.Date(obj.getBithDate().getTime()));
+            st.setDouble(4,obj.getBaseSalary());
+            st.setInt(5,obj.getDepartament().getId());
+            st.setInt(6,obj.getId());
+            st.executeUpdate();
+
+        }catch (SQLException e){
+            throw new BDEXCEPTION(e.getMessage());
+        }finally {
+            DBConnector.closeStatement(st);
+        }
+
     }
 
     @Override
