@@ -86,7 +86,37 @@ public class SellerDaoJBDC implements SellerDao {
 
     @Override
     public List<Seller> findAll() {
-        return null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        try {
+            statement = conn.prepareStatement("Select " +
+                    "seller.*,department.Name as Depname" +
+                    " from seller " +
+                    "inner join department on seller.DepartmentId = department.Id" +
+                    " order by Name");
+            resultSet = statement.executeQuery();
+            List<Seller> list = new ArrayList<>();
+            Map<Integer, Departament> map = new HashMap<>();
+            while (resultSet.next()) {
+                Departament dep = map.get(resultSet.getInt("DepartmentId"));
+
+                if (dep == null) {
+                    dep = instantiateDepartament(resultSet);
+                    map.put(resultSet.getInt("DepartmentId"), dep);
+                }
+                Seller sel = instantiateSeller(resultSet, dep);
+                list.add(sel);
+            }
+            return list;
+
+        } catch (SQLException e) {
+            throw new BDEXCEPTION(e.getMessage());
+        } finally {
+            DBConnector.closeResult(resultSet);
+            DBConnector.closeStatement(statement);
+        }
+
+
     }
 
     @Override
@@ -104,14 +134,18 @@ public class SellerDaoJBDC implements SellerDao {
             List<Seller> list = new ArrayList<>();
             Map<Integer, Departament> map = new HashMap<>();
             while (resultSet.next()) {
+                // caso não exista essa chave retorna nulo
                 Departament dep = map.get(resultSet.getInt("DepartmentId"));
 
                 if (dep == null) {
-                    dep = instantiateDepartament(   resultSet);
+                    // caso seja nulo coloca o valor
+                    dep = instantiateDepartament(resultSet);
                     map.put(resultSet.getInt("DepartmentId"), dep);
                 }
+                // aqui recebe o dep com o valor do departamento
                 Seller sel = instantiateSeller(resultSet, dep);
                 list.add(sel);
+                // o intuito desse uso é ter certeza que não vai criar mais um objeto de departament
             }
             return list;
 
